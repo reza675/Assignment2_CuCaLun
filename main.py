@@ -1,12 +1,11 @@
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
-from pymongo.server_api import ServerApi
 
 app = Flask(__name__)
 uri = "mongodb+srv://Salman:PGmZaVVguCzcedmt@cucalun.uhxfh.mongodb.net/?retryWrites=true&w=majority&appName=CuCaLun"
 
 # Koneksi ke MongoDB
-client = MongoClient(uri, server_api=ServerApi('1'))
+client = MongoClient(uri)
 db = client["sensor_database"]
 collection = db["sensor_data"]
 

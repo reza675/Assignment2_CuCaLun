@@ -6,8 +6,8 @@ import dht
 
 # Konfigurasi WiFi
 # Konfigurasi WiFi
-SSID = "Ziaf 5G"
-PASSWORD = "zidanaffan"
+SSID = "POCO"
+PASSWORD = "qwertyuiop"	
 
 # Konfigurasi Ubidots
 UBIDOTS_TOKEN = "BBUS-FzXu6L5Qrvz0JburU8VkLHbaZxQe8d"
@@ -19,7 +19,7 @@ FLASK_API_URL = "http://127.0.0.1:5000/sensor-data"  # Sesuaikan IP Flask
 
 # Inisialisasi sensor
 dht_sensor = dht.DHT11(Pin(4))  # DHT11 di GPIO4
-pir_sensor = Pin(5, Pin.IN)  # PIR di GPIO5
+pir_sensor = Pin(19, Pin.IN)  # PIR di GPIO5
 led= Pin((18),Pin.OUT)
 led.on()
 # Koneksi ke WiFi
@@ -56,15 +56,27 @@ def send_to_flask(temp, hum, motion):
     response = urequests.post(FLASK_API_URL, json=payload, headers=headers)
     print("Flask Response:", response.text)
 
+
+time.sleep(5)
+print("A")
+
 # Loop utama
+
 while True:
-    dht_sensor.measure()
-    temperature = dht_sensor.temperature()
-    humidity = dht_sensor.humidity()
+    try:
+        dht_sensor.measure()
+        temperature = dht_sensor.temperature()
+        humidity = dht_sensor.humidity()
+    except OSError as e:
+        print("Failed to read DHT11:", e)
+        temperature = None
+        humidity = None
+
     motion_detected = 1 if pir_sensor.value() else 0
 
-    send_to_ubidots(temperature, humidity, motion_detected)
-    send_to_flask(temperature, humidity, motion_detected)
+    if temperature is not None and humidity is not None:
+        send_to_ubidots(temperature, humidity, motion_detected)
+        send_to_flask(temperature, humidity, motion_detected)
 
     time.sleep(10)  # Kirim setiap 10 detik
-
+    
